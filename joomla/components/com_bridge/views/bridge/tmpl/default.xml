@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<metadata>
+	<layout title="Member Update">
+		<message>
+			Message goes here
+		</message>
+	</layout>
+	<state>
+		<name>Member Update</name>
+		<description>Description goes here</description>
+		<url>
+		</url>
+		<params>
+	 	</params>
+		<advanced>
+		</advanced>
+	</state>
+</metadata>

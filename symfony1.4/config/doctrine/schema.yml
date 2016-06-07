@@ -1,0 +1,625 @@
+JosUser:
+  tableName: jos_users
+  columns:
+    id: { type: integer(4), primary: true, autoincrement: true }
+    name: { type: string(255), notnull: true }
+    username: { type: string(150), notnull: true }
+    email: { type: string(100), notnull: true }
+    password: { type: string(100), notnull: true }
+    usertype: { type: string(25), notnull: true }
+    block: { type: integer(1), notnull: true }
+    sendemail: { type: integer(1), notnull: false }
+    gid: { type: integer(1), default: '1', notnull: true }
+    registerdate: { type: timestamp(25), notnull: true }
+    lastvisitdate: { type: timestamp(25), notnull: true }
+    activation: { type: string(100), notnull: true }
+    params: { type: string(), notnull: true }
+  relations:
+    AccessControlObject: { class: JosCoreAclAro, local: id, foreign: value, foreignType: one }
+
+JosCoreAclAro:
+  columns:
+    id: { type: integer(4),fixed: false, unsigned: false, primary: true, autoincrement: true}
+    section_value: { type: string(240), notnull: true }
+    value: {type: string(240), notnull: true }
+    order_value: { type: integer(4), notnull: true }
+    name: { type: string(255), notnull: true }
+    hidden: { type: integer(4), notnull: true }
+  relations: 
+    Group: { class: JosCoreAclAroGroup, local: aro_id, foreign: group_id, refClass: JosCoreAclGroupsAroMap, foreignType: one }
+
+JosCoreAclGroupsAroMap:
+  columns:
+    group_id: { type: integer(4), primary: true }
+    section_value: { type: string(240) }
+    aro_id: { type: integer(4), primary: true }
+  relations: 
+    JosCoreAclAro: { class: JosCoreAclAro, local: aro_id, foreign: id, onDelete: CASCADE }
+    JosCoreAclAroGroup: { class: JosCoreAclAroGroup, local: group_id, foreign: id, onDelete: CASCADE }
+    
+JosCoreAclAroGroup:
+  tableName: jos_core_acl_aro_groups
+  columns:
+    id: {type: integer(4), unique: true,primary: true, autoincrement: true }
+    parent_id: { type: integer(4), notnull: true }
+    name: { type: string(255), notnull: true }
+    lft: { type: integer(4), notnull: true }
+    rgt: { type: integer(4), notnull: true }
+    value: { type: string(255), notnull: true }
+
+
+JosVmOrder:
+  tableName: jos_vm_orders
+  columns:
+    order_id: { type: integer(4), primary: true, autoincrement: true }
+    user_id: { type: integer(4), notnull: true }
+    vendor_id: { type: integer(4), notnull: true }
+    order_number: { type: string(32), notnull: false }
+    user_info_id: { type: string(32), notnull: false }
+    order_total: { type: 'decimal(15, 5)', notnull: true }
+    order_subtotal: { type: 'decimal(15, 5)', notnull: false }
+    order_tax: { type: 'decimal(10, 2)', notnull: false }
+    order_tax_details: { type: string(), notnull: true }
+    order_shipping: { type: 'decimal(10, 2)', notnull: false }
+    order_shipping_tax: { type: 'decimal(10, 2)', notnull: false }
+    coupon_discount: { type: 'decimal(12, 2)', notnull: true }
+    coupon_code: { type: string(32), notnull: false }
+    order_discount: { type: 'decimal(12, 2)', notnull: true }
+    order_currency: { type: string(16), notnull: false }
+    order_status: { type: string(1), notnull: false }
+    cdate: { type: integer(4), notnull: false }
+    mdate: { type: integer(4), notnull: false }
+    ship_method_id: { type: string(255), notnull: false }
+    customer_note: { type: string(), notnull: true }
+    ip_address: { type: string(15), notnull: true }
+  relations:
+    User: { class: JosUser, local: user_id, foreignAlias: OrderList }
+    LatestVmOrderDetail: { class: LatestVmOrderDetail, local: order_id, foreign: order_id }
+    
+    
+
+JosVmOrderHistory:
+  tableName: jos_vm_order_history
+  columns:
+    order_status_history_id: { type: integer(4),primary: true, autoincrement: true }
+    order_id: { type: integer(4) }
+    order_status_code: { type: string(1) }
+    date_added: { type: timestamp(25) }
+    customer_notified: { type: integer(4), notnull: false }
+    comments: { type: clob(16777777), notnull: false }
+  relations:
+    Order: { class: JosVmOrder, local: order_id, foreign: order_id }
+    OrderStatus: { class: JosVmOrderStatus, local: order_status_code, foreign: order_status_code }
+
+JosVmOrderItem:
+  columns:
+    order_item_id: { type: integer(4), primary: true, autoincrement: true }
+    order_id: { type: integer(4), notnull: false }
+    user_info_id: { type: string(32), notnull: false }
+    vendor_id: { type: integer(4), notnull: false }
+    product_id: { type: integer(4), notnull: false }
+    order_item_sku: { type: string(64), notnull: true }
+    order_item_name: { type: string(64), notnull: true }
+    product_quantity: { type: integer(4), notnull: false }
+    product_item_price: { type: 'decimal(15, 5)', notnull: false }
+    product_final_price: { type: 'decimal(12, 2)', notnull: true }
+    order_item_currency: { type: string(16), notnull: false }
+    order_status: { type: string(1), notnull: false }
+    cdate: { type: integer(4), notnull: false }
+    mdate: { type: integer(4), notnull: false }
+    product_attribute: { type: string(), notnull: false }
+  relations:
+    Order: { class: JosVmOrder, local: order_id, foreign: order_id, foreignAlias: ItemList }
+    
+    
+JosVmOrderPayment:
+  columns:
+    id: { type: integer(8), autoincrement: true, primary: true }
+    order_id: { type: integer(4), notnull: true }
+    payment_method_id: { type: integer(4), notnull: false }
+    order_payment_code: { type: string(30), notnull: true }
+    order_payment_number: { type: blob(),  notnull: false }
+    order_payment_expire: { type: integer(4), notnull: false }
+    order_payment_name: { type: string(255), notnull: false }
+    order_payment_log: { type: string(), notnull: false }
+    order_payment_trans_id: { type: string(), notnull: true }
+  relations:
+    Order: { class: JosVmOrder, local: order_id, foreign: order_id, foreignAlias: PaymentList }
+    PaymentMethod: { class: JosVmPaymentMethod, local: payment_method_id, foreign: payment_method_id }
+
+JosVmOrderStatus:
+  columns:
+    order_status_id: { type: integer(4), primary: true, autoincrement: true }
+    order_status_code: { type: string(1), fixed: true, notnull: true }
+    order_status_name: { type: string(64), notnull: false }
+    order_status_description: { type: string(), notnull: true }
+    list_order: { type: integer(4), notnull: false }
+    vendor_id: { type: integer(4), notnull: false }
+    
+JosVmOrderUserInfo:
+  columns:
+    order_info_id: { type: integer(4), primary: true, autoincrement: true }
+    order_id: { type: integer(4), notnull: true }
+    user_id: { type: integer(4), notnull: true }
+    address_type: { type: string(2), notnull: false }
+    address_type_name: { type: string(32), notnull: false }
+    company: { type: string(64), notnull: false }
+    title: { type: string(32), notnull: false }
+    last_name: { type: string(32), notnull: false }
+    first_name: { type: string(32), notnull: false }
+    middle_name: { type: string(32), notnull: false }
+    phone_1: { name: phone_1 as phone1, type: string(32), notnull: false }
+    phone_2: { name: phone_2 as phone2, type: string(32), notnull: false }
+    fax: { type: string(32), notnull: false }
+    address_1: { name: address_1 as address1, type: string(64), notnull: true }
+    address_2: { name: address_2 as address2, type: string(64), notnull: false }
+    city: { type: string(32), notnull: true }
+    state: { type: string(32), notnull: true }
+    country: { type: string(32), notnull: true }
+    zip: { type: string(32), notnull: true }
+    user_email: { type: string(255), notnull: false }
+    extra_field_1: { name: extra_field_1 as extra_field1, type: string(255), notnull: false }
+    extra_field_2: { name: extra_field_2 as extra_field2, type: string(255), notnull: false }
+    extra_field_3: { name: extra_field_3 as extra_field3, type: string(255), notnull: false }
+    extra_field_4: { name: extra_field_4 as extra_field4, type: string(1), notnull: false }
+    extra_field_5: { name: extra_field_5 as extra_field5, type: string(1), notnull: false }
+    bank_account_nr: { type: string(32), notnull: true }
+    bank_name: { type: string(32), notnull: true }
+    bank_sort_code: { type: string(16), notnull: true }
+    bank_iban: { type: string(64), notnull: true }
+    bank_account_holder: { type: string(48), notnull: true }
+    bank_account_type:
+      type: enum(17)
+      fixed: false
+      unsigned: false
+      values:
+        - Checking
+        - 'Business Checking'
+        - Savings
+      default: Checking
+      notnull: true
+  relations:
+    Order: { class: JosVmOrder, local: order_id, foreign: order_id, foreignAlias: UserInfoList }
+    User: { class: JosUser, local: user_id, foreignAlias: VMOrderUserInfoList } 
+
+JosVmUserInfo:
+  columns:
+    user_info_id: { type: string(32), notnull: true,'primary' => true }
+    user_id: { type: integer(4), notnull: true }
+    address_type: { type: string(2), notnull: false }
+    address_type_name: { type: string(32), notnull: false }
+    company: { type: string(64), notnull: false }
+    title: { type: string(32), notnull: false }
+    last_name: { type: string(32), notnull: false }
+    first_name: { type: string(32), notnull: false }
+    middle_name: { type: string(32), notnull: false }
+    phone_1: { name: phone_1 as phone1, type: string(32), notnull: false }
+    phone_2: { name: phone_2 as phone2, type: string(32), notnull: false }
+    fax: { type: string(32), notnull: false }
+    address_1: { name: address_1 as address1, type: string(64), notnull: true }
+    address_2: { name: address_2 as address2, type: string(64), notnull: false }
+    city: { type: string(32), notnull: true }
+    state: { type: string(32), notnull: true }
+    country: { type: string(32), notnull: true }
+    zip: { type: string(32), notnull: true }
+    user_email: { type: string(255), notnull: false }
+    extra_field_1: { name: extra_field_1 as extra_field1, type: string(255), notnull: false }
+    extra_field_2: { name: extra_field_2 as extra_field2, type: string(255), notnull: false }
+    extra_field_3: { name: extra_field_3 as extra_field3, type: string(255), notnull: false }
+    extra_field_4: { name: extra_field_4 as extra_field4, type: string(1), notnull: false }
+    extra_field_5: { name: extra_field_5 as extra_field5, type: string(1), notnull: false }
+    bank_account_nr: { type: string(32), notnull: true }
+    bank_name: { type: string(32), notnull: true }
+    bank_sort_code: { type: string(16), notnull: true }
+    bank_iban: { type: string(64), notnull: true }
+    bank_account_holder: { type: string(48), notnull: true }
+    bank_account_type:
+      type: enum(17)
+      fixed: false
+      unsigned: false
+      values:
+        - Checking
+        - 'Business Checking'
+        - Savings
+      default: Checking
+      notnull: true
+  relations:
+    User: { class: JosUser, local: user_id, foreignAlias: VMOrderUserInfoList } 
+    
+JosVmPaymentMethod:
+  columns:
+    payment_method_id: { type: integer(4),unsigned: false,primary: true,autoincrement: true }
+    vendor_id: {type: integer(4),notnull: false}
+    payment_method_name: { type: string(255), notnull: false }
+    payment_class: { type: string(50), default: '',notnull: true }
+    shopper_group_id: { type: integer(4), notnull: false }
+    payment_method_discount: { type: 'decimal(12, 2)', notnull: false }
+    payment_method_discount_is_percent: { type: integer(1), notnull: true }
+    payment_method_discount_max_amount: { type: 'decimal(10, 2)', notnull: true }
+    payment_method_discount_min_amount: { type: 'decimal(10, 2)', notnull: true }
+    list_order: { type: integer(4), notnull: false }
+    payment_method_code: { type: string(8), notnull: false }
+    enable_processor: { type: string(1), notnull: false }
+    is_creditcard: { type: integer(1), default: '0', notnull: true }
+    payment_enabled: { type: string(1), notnull: true }
+    accepted_creditcards: { type: string(128), notnull: true }
+    payment_extrainfo: { type: string(), notnull: true }
+    payment_passkey: { type: blob(), notnull: true }
+
+
+
+JosVmProduct:
+  tableName: jos_vm_product
+  columns:
+    product_id:
+      type: integer(4)
+      fixed: false
+      unsigned: false
+      primary: true
+      autoincrement: true
+    vendor_id:
+      type: integer(4)
+      fixed: false
+      unsigned: false
+      primary: false
+      default: '0'
+      notnull: true
+      autoincrement: false
+    product_parent_id:
+      type: integer(4)
+      fixed: false
+      unsigned: false
+      primary: false
+      default: '0'
+      notnull: true
+      autoincrement: false
+    product_sku:
+      type: string(64)
+      fixed: false
+      unsigned: false
+      primary: false
+      default: ''
+      notnull: true
+      autoincrement: false
+    product_s_desc:
+      type: string(255)
+      fixed: false
+      unsigned: false
+      primary: false
+      notnull: false
+      autoincrement: false
+    product_desc:
+      type: string()
+      fixed: false
+      unsigned: false
+      primary: false
+      notnull: false
+      autoincrement: false
+    product_thumb_image:
+      type: string(255)
+      fixed: false
+      unsigned: false
+      primary: false
+      notnull: false
+      autoincrement: false
+    product_full_image:
+      type: string(255)
+      fixed: false
+      unsigned: false
+      primary: false
+      notnull: false
+      autoincrement: false
+    product_publish:
+      type: string(1)
+      fixed: true
+      unsigned: false
+      primary: false
+      notnull: false
+      autoincrement: false
+    product_weight:
+      type: 'decimal(10, 4)'
+      fixed: false
+      unsigned: false
+      primary: false
+      notnull: false
+      autoincrement: false
+    product_weight_uom:
+      type: string(32)
+      fixed: false
+      unsigned: false
+      primary: false
+      default: pounds.
+      notnull: false
+      autoincrement: false
+    product_length:
+      type: 'decimal(10, 4)'
+      fixed: false
+      unsigned: false
+      primary: false
+      notnull: false
+      autoincrement: false
+    product_width:
+      type: 'decimal(10, 4)'
+      fixed: false
+      unsigned: false
+      primary: false
+      notnull: false
+      autoincrement: false
+    product_height:
+      type: 'decimal(10, 4)'
+      fixed: false
+      unsigned: false
+      primary: false
+      notnull: false
+      autoincrement: false
+    product_lwh_uom:
+      type: string(32)
+      fixed: false
+      unsigned: false
+      primary: false
+      default: inches
+      notnull: false
+      autoincrement: false
+    product_url:
+      type: string(255)
+      fixed: false
+      unsigned: false
+      primary: false
+      notnull: false
+      autoincrement: false
+    product_in_stock:
+      type: integer(4)
+      fixed: false
+      unsigned: false
+      primary: false
+      default: '0'
+      notnull: true
+      autoincrement: false
+    product_available_date:
+      type: integer(4)
+      fixed: false
+      unsigned: false
+      primary: false
+      notnull: false
+      autoincrement: false
+    product_availability:
+      type: string(56)
+      fixed: false
+      unsigned: false
+      primary: false
+      default: ''
+      notnull: true
+      autoincrement: false
+    product_special:
+      type: string(1)
+      fixed: true
+      unsigned: false
+      primary: false
+      notnull: false
+      autoincrement: false
+    product_discount_id:
+      type: integer(4)
+      fixed: false
+      unsigned: false
+      primary: false
+      notnull: false
+      autoincrement: false
+    ship_code_id:
+      type: integer(4)
+      fixed: false
+      unsigned: false
+      primary: false
+      notnull: false
+      autoincrement: false
+    cdate:
+      type: integer(4)
+      fixed: false
+      unsigned: false
+      primary: false
+      notnull: false
+      autoincrement: false
+    mdate:
+      type: integer(4)
+      fixed: false
+      unsigned: false
+      primary: false
+      notnull: false
+      autoincrement: false
+    product_name:
+      type: string(64)
+      fixed: false
+      unsigned: false
+      primary: false
+      notnull: false
+      autoincrement: false
+    product_sales:
+      type: integer(4)
+      fixed: false
+      unsigned: false
+      primary: false
+      default: '0'
+      notnull: true
+      autoincrement: false
+    custom_attribute:
+      type: string()
+      fixed: false
+      unsigned: false
+      primary: false
+      notnull: true
+      autoincrement: false
+    product_tax_id:
+      type: integer(4)
+      fixed: false
+      unsigned: false
+      primary: false
+      notnull: false
+      autoincrement: false
+    product_unit:
+      type: string(32)
+      fixed: false
+      unsigned: false
+      primary: false
+      notnull: false
+      autoincrement: false
+    product_packaging:
+      type: integer(4)
+      fixed: false
+      unsigned: false
+      primary: false
+      notnull: false
+      autoincrement: false
+    child_options:
+      type: string(45)
+      fixed: false
+      unsigned: false
+      primary: false
+      notnull: false
+      autoincrement: false
+    quantity_options:
+      type: string(45)
+      fixed: false
+      unsigned: false
+      primary: false
+      notnull: false
+      autoincrement: false
+    child_option_ids:
+      type: string(45)
+      fixed: false
+      unsigned: false
+      primary: false
+      notnull: false
+      autoincrement: false
+    product_order_levels:
+      type: string(45)
+      fixed: false
+      unsigned: false
+      primary: false
+      notnull: false
+      autoincrement: false
+
+JosVmProductCategoryXref:
+  connection: doctrine
+  tableName: jos_vm_product_category_xref
+  columns:
+    id:
+      type: integer(4)
+      fixed: false
+      unsigned: false
+      primary: true
+      autoincrement: true
+    category_id:
+      type: integer(4)
+      fixed: false
+      unsigned: false
+      primary: false
+      default: '0'
+      notnull: true
+      autoincrement: false
+    product_id:
+      type: integer(4)
+      fixed: false
+      unsigned: false
+      primary: false
+      default: '0'
+      notnull: true
+      autoincrement: false
+    product_list:
+      type: integer(4)
+      fixed: false
+      unsigned: false
+      primary: false
+      notnull: false
+      autoincrement: false
+JosVmProductPrice:
+  connection: doctrine
+  tableName: jos_vm_product_price
+  columns:
+    product_price_id:
+      type: integer(4)
+      fixed: false
+      unsigned: false
+      primary: true
+      autoincrement: true
+    product_id:
+      type: integer(4)
+      fixed: false
+      unsigned: false
+      primary: false
+      default: '0'
+      notnull: true
+      autoincrement: false
+    product_price:
+      type: 'decimal(12, 5)'
+      fixed: false
+      unsigned: false
+      primary: false
+      notnull: false
+      autoincrement: false
+    product_currency:
+      type: string(16)
+      fixed: true
+      unsigned: false
+      primary: false
+      notnull: false
+      autoincrement: false
+    product_price_vdate:
+      type: integer(4)
+      fixed: false
+      unsigned: false
+      primary: false
+      notnull: false
+      autoincrement: false
+    product_price_edate:
+      type: integer(4)
+      fixed: false
+      unsigned: false
+      primary: false
+      notnull: false
+      autoincrement: false
+    cdate:
+      type: integer(4)
+      fixed: false
+      unsigned: false
+      primary: false
+      notnull: false
+      autoincrement: false
+    mdate:
+      type: integer(4)
+      fixed: false
+      unsigned: false
+      primary: false
+      notnull: false
+      autoincrement: false
+    shopper_group_id:
+      type: integer(4)
+      fixed: false
+      unsigned: false
+      primary: false
+      notnull: false
+      autoincrement: false
+    price_quantity_start:
+      type: integer(4)
+      fixed: false
+      unsigned: true
+      primary: false
+      default: '0'
+      notnull: true
+      autoincrement: false
+    price_quantity_end:
+      type: integer(4)
+      fixed: false
+      unsigned: true
+      primary: false
+      default: '0'
+      notnull: true
+      autoincrement: false
+      
+ 
+JosComponent:
+  connection: doctrine
+  tableName: jos_components
+  columns:
+    id: { type: integer(4), notnull: true, unique: true, primary: true, autoincrement: true }
+    name: { type: string(50), notnull: true, unique: true }
+    option: { type: string(50), notnull: true }
+    params: { type: string(16777777), notnull: false }

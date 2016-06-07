@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<install version="1.5" type="plugin" group="system">
+    <name>System - NZ GBC - Frontend - Load Symfony</name>
+    <author>Joomla! Project</author>
+    <creationDate>May 2011</creationDate>
+    <copyright></copyright>
+    <license></license>
+    <authorEmail>info@automatem.co.nz</authorEmail>
+    <authorUrl>www.automatem.co.nz</authorUrl>
+    <version>1.5</version>
+    <description>Loads Symfony views</description>
+    <files>
+        <filename plugin="loadSymfony">loadSymfony.php</filename>
+    </files>
+    <params>
+        <param name="mappings" type="textarea" default="" label="Define mappings for Symfony loader" description="" cols="60" rows="20" />
+        
+    </params>
+</install>
+
